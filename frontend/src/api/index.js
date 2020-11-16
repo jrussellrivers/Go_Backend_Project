@@ -3,13 +3,17 @@ var socket = new WebSocket("ws://localhost:8080/ws");
 let connect = cb => {
     console.log("connecting");
 
-    socket.onopen = () => {
+    socket.onopen = (e) => {
+        console.log(e)
         console.log("Successfully Connected");
     };
 
     socket.onmessage = msg => {
         console.log(msg);
-        cb(msg.data);
+        cb({
+            data:msg.data,
+            timeStamp:Date.now()
+        });
     };
 
     socket.onclose = event => {

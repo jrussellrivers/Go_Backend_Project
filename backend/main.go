@@ -8,7 +8,7 @@ import (
 )
 
 func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
-	fmt.Println("WebSocket Endpoint Hit")
+	fmt.Println("\nWebSocket Endpoint Hit")
 	conn, err := websocket.Upgrade(w, r)
 	if err != nil {
 		fmt.Fprintf(w, "%+v\n", err)
