@@ -1,14 +1,14 @@
 import React, { Component } from "react";
 import {useSelector, useDispatch} from 'react-redux'
-import "./ChatHistory.css";
+import "./ChatHistory.scss";
+import Message from "../Message/Message"
 
 const ChatHistory = () => {
 
-    const dispatch = useDispatch()
     const chatHistory = useSelector(state => state.messages.messages)
 
     const messages = chatHistory.map((msg, index) => (
-    <p key={index}>{msg}</p>
+        <Message key={index} message={msg} />
     ));
 
     return (
