@@ -20,6 +20,8 @@ func NewPool() *Pool {
 	}
 }
 
+// Grabs the user ID
+
 // Start will listen for anything passed to any of our Pool's channels
 // then if anything is received into one of these channels, it’ll act accordingly.
 func (pool *Pool) Start() {
@@ -29,9 +31,8 @@ func (pool *Pool) Start() {
 			pool.Clients[client] = true
 			fmt.Println("Size of Connection Pool: ", len(pool.Clients))
 			for client := range pool.Clients {
-				fmt.Println(*client)
 				fmt.Printf("\n%v joined", client)
-				client.Conn.WriteJSON(Message{Type: 2, Body: "New Connection..."})
+				// client.Conn.WriteJSON(Message{Type: 2, Body: "New Connection..."})
 			}
 			break
 		case client := <-pool.Unregister:
