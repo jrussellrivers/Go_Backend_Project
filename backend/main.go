@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -54,6 +55,32 @@ func setupRoutes() {
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(pool, w, r)
+	})
+
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		type Temp struct {
+			Username string
+			Password string
+		}
+		fmt.Println("method:", r.Method, "body:", r.Body)
+		fmt.Println("\n", r)
+		if r.Method == "POST" {
+			var tempClient Temp
+			decoder := json.NewDecoder(r.Body)
+			err := decoder.Decode(&tempClient)
+
+			if err != nil {
+				panic(err)
+			}
+			defer r.Body.Close()
+
+			fmt.Printf("\nName: %v, Password: %v", tempClient.Username, tempClient.Password)
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(tempClient)
+		} else {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			w.Write([]byte("Method not allowed."))
+		}
 	})
 
 	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {

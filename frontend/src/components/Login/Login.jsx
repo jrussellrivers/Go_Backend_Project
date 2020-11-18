@@ -15,14 +15,17 @@ const Login = () => {
 
     function handleSubmit(event) {
         event.preventDefault();
-
-        fetch(`localhost:8080/login`,{method:'post',body:JSON.stringify(formData),headers:{'Content-Type': 'application/json'}})
+        let formData = {
+            Username: username,
+            Password: password
+        }
+        fetch(`http://localhost:8080/login`,{method:'POST',Body:JSON.stringify(formData),headers:{'Content-Type': 'application/json'}})
         .then(data=>data.json())
-        .then(json=>{
-            if (json.success === true){
-                dispatch(changeToken(json))
-                dispatch(changePage('feed'))
-            } 
+        .then(json=>{console.log(json)
+            // if (json.success === true){
+            //     dispatch(changeToken(json))
+            //     dispatch(changePage('feed'))
+            // } 
         })
     }
 
