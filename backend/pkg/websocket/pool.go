@@ -1,6 +1,8 @@
 package websocket
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Pool structure
 type Pool struct {
@@ -31,16 +33,18 @@ func (pool *Pool) Start() {
 			pool.Clients[client] = true
 			fmt.Println("Size of Connection Pool: ", len(pool.Clients))
 			for client := range pool.Clients {
-				fmt.Printf("\n%v joined", client)
-				// client.Conn.WriteJSON(Message{Type: 2, Body: "New Connection..."})
+				p := *client
+				newString := p.Username + " has joined the chat"
+				client.Conn.WriteJSON(Message{ID: p.ID, Body: newString, Type: 1})
 			}
 			break
 		case client := <-pool.Unregister:
 			delete(pool.Clients, client)
 			fmt.Println("\nSize of Connection Pool: ", len(pool.Clients))
 			for client := range pool.Clients {
-				fmt.Printf("\n%v disconnected", client)
-				// client.Conn.WriteJSON(Message{Type: 1, Body: "User Disconnected..."})
+				p := *client
+				newString := p.Username + " has left the chat"
+				client.Conn.WriteJSON(Message{ID: p.ID, Body: newString, Type: 3})
 			}
 			break
 		case message := <-pool.Broadcast:

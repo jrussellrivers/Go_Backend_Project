@@ -24,8 +24,10 @@ func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := &websocket.Client{
-		Conn: conn,
-		Pool: pool,
+		ID:       1,
+		Username: "Jordan",
+		Conn:     conn,
+		Pool:     pool,
 	}
 
 	pool.Register <- client
@@ -33,15 +35,6 @@ func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
 }
 
 func setupRoutes() {
-	pool := websocket.NewPool()
-	go pool.Start()
-
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(pool, w, r)
-	})
-}
-
-func main() {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"dbname=%s sslmode=disable",
 		host, port, user, dbname)
@@ -49,14 +42,39 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	// defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("Distributed Chat App v0.01")
+	pool := websocket.NewPool()
+	go pool.Start()
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(pool, w, r)
+	})
+
+	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		sqlStatement := `SELECT * FROM users;`
+		var id int
+		var username string
+		var password string
+		row := db.QueryRow(sqlStatement)
+		switch err := row.Scan(&id, &username, &password); err {
+		case sql.ErrNoRows:
+			fmt.Println("No rows were returned!")
+		case nil:
+			fmt.Println(id, username, password)
+		default:
+			panic(err)
+		}
+	})
+}
+
+func main() {
 	setupRoutes()
+	fmt.Println("Distributed Chat App v0.01")
 	http.ListenAndServe(":8080", nil)
 }

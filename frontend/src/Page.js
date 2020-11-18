@@ -3,13 +3,14 @@ import {useSelector, useDispatch} from 'react-redux'
 import { connect, sendMsg } from "./api/index"
 import {addMessage} from './app/slices/messagesSlice'
 import Header from './components/Header/Header';
+import Login from './components/Login/Login'
 import ChatHistory from './components/ChatHistory/ChatHistory'
 import ChatInput from './components/ChatInput/ChatInput'
 
 export default function Page() {
 
     const dispatch = useDispatch()
-    const chatHistory = useSelector(state => state.messages.messages)
+    // const chatHistory = useSelector(state => state.messages.messages)
 
     connect((msg) => {
         dispatch(addMessage(msg))
@@ -22,6 +23,7 @@ export default function Page() {
     return (
         <div>
             <Header />
+            <Login />
             <ChatHistory />
             <ChatInput send={send} />
         </div>

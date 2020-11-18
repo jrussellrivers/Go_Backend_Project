@@ -9,15 +9,17 @@ import (
 
 // Client structure
 type Client struct {
-	ID   string
-	Conn *websocket.Conn
-	Pool *Pool
+	ID       int
+	Username string
+	Conn     *websocket.Conn
+	Pool     *Pool
 }
 
 // Message structure
 type Message struct {
-	Type int    `json:"type"`
+	ID   int    `json:"ID"`
 	Body string `json:"body"`
+	Type int    `json:"type"`
 }
 
 func (c *Client) Read() {
@@ -32,7 +34,9 @@ func (c *Client) Read() {
 			log.Println(err)
 			return
 		}
-		message := Message{Type: messageType, Body: string(p)}
+		fmt.Println("Type:", messageType)
+
+		message := Message{ID: c.ID, Body: string(p), Type: 2}
 		c.Pool.Broadcast <- message
 		fmt.Printf("\nMessage Received: %+v\n", message)
 	}
