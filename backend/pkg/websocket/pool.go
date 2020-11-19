@@ -35,7 +35,7 @@ func (pool *Pool) Start() {
 			for client := range pool.Clients {
 				p := *client
 				newString := p.Username + " has joined the chat"
-				client.Conn.WriteJSON(Message{ID: p.ID, Body: newString, Type: 1})
+				client.Conn.WriteJSON(Message{Username: p.Username, Body: newString, Type: 1})
 			}
 			break
 		case client := <-pool.Unregister:
@@ -44,7 +44,7 @@ func (pool *Pool) Start() {
 			for client := range pool.Clients {
 				p := *client
 				newString := p.Username + " has left the chat"
-				client.Conn.WriteJSON(Message{ID: p.ID, Body: newString, Type: 3})
+				client.Conn.WriteJSON(Message{Username: p.Username, Body: newString, Type: 3})
 			}
 			break
 		case message := <-pool.Broadcast:

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,12 +9,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	host   = "localhost"
-	port   = 5432
-	user   = "jordanrivers"
-	dbname = "golangchat"
-)
+// const (
+// 	host   = "localhost"
+// 	port   = 5432
+// 	user   = "jordanrivers"
+// 	dbname = "golangchat"
+// )
+
+var newClient string
 
 func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
 	fmt.Println("\nWebSocket Endpoint Hit")
@@ -25,30 +26,34 @@ func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := &websocket.Client{
-		ID:       1,
-		Username: "Jordan",
+		Username: newClient,
 		Conn:     conn,
 		Pool:     pool,
 	}
 
 	pool.Register <- client
 	client.Read()
+
 }
 
 func setupRoutes() {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"dbname=%s sslmode=disable",
-		host, port, user, dbname)
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		panic(err)
+	type Temp struct {
+		Username string
 	}
+
+	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	// 	"dbname=%s sslmode=disable",
+	// 	host, port, user, dbname)
+	// db, err := sql.Open("postgres", psqlInfo)
+	// if err != nil {
+	// 	panic(err)
+	// }
 	// defer db.Close()
 
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
+	// err = db.Ping()
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	pool := websocket.NewPool()
 	go pool.Start()
@@ -58,12 +63,7 @@ func setupRoutes() {
 	})
 
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		type Temp struct {
-			Username string
-			Password string
-		}
-		fmt.Println("method:", r.Method, "body:", r.Body)
-		fmt.Println("\n", r)
+		// fmt.Println(r)
 		if r.Method == "POST" {
 			var tempClient Temp
 			decoder := json.NewDecoder(r.Body)
@@ -72,9 +72,11 @@ func setupRoutes() {
 			if err != nil {
 				panic(err)
 			}
+
 			defer r.Body.Close()
 
-			fmt.Printf("\nName: %v, Password: %v", tempClient.Username, tempClient.Password)
+			newClient = tempClient.Username
+			fmt.Printf("\nUsername: %v", tempClient.Username)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(tempClient)
 		} else {
@@ -83,21 +85,21 @@ func setupRoutes() {
 		}
 	})
 
-	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
-		sqlStatement := `SELECT * FROM users;`
-		var id int
-		var username string
-		var password string
-		row := db.QueryRow(sqlStatement)
-		switch err := row.Scan(&id, &username, &password); err {
-		case sql.ErrNoRows:
-			fmt.Println("No rows were returned!")
-		case nil:
-			fmt.Println(id, username, password)
-		default:
-			panic(err)
-		}
-	})
+	// http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+	// 	sqlStatement := `SELECT * FROM users;`
+	// 	var id int
+	// 	var username string
+	// 	var password string
+	// 	row := db.QueryRow(sqlStatement)
+	// 	switch err := row.Scan(&id, &username, &password); err {
+	// 	case sql.ErrNoRows:
+	// 		fmt.Println("No rows were returned!")
+	// 	case nil:
+	// 		fmt.Println(id, username, password)
+	// 	default:
+	// 		panic(err)
+	// 	}
+	// })
 }
 
 func main() {

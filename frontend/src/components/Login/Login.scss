@@ -6,4 +6,13 @@
         margin: 0 auto;
         max-width: 320px;
     }
+
+    .group{
+        display: inline-flex;
+        justify-content: space-between;
+    }
+
+    .input{
+        margin: 10px;
+    }
 }
